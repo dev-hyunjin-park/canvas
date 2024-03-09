@@ -4,8 +4,8 @@ const canvas = document.getElementById("canvas1");
 const ctx = canvas.getContext("2d");
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
-
 // Particle 내부에 작성하면 매번 적용되기때문에 효율성을 위해 전역에 작성한다
+ctx.fillStyle = "white";
 const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
 gradient.addColorStop(0, "white");
 gradient.addColorStop(0.5, "magenta");
@@ -43,33 +43,17 @@ class Particle {
       this.vy *= -1;
     }
   }
-
-  reset() {
-    this.x =
-      this.radius + Math.random() * (this.effect.width - this.radius * 2);
-    this.y =
-      this.radius + Math.random() * (this.effect.height - this.radius * 2);
-  }
 }
 
 class Effect {
-  constructor(canvas, context) {
+  constructor(canvas) {
     this.canvas = canvas;
     this.width = this.canvas.width;
     this.height = this.canvas.height;
     this.particles = [];
     this.numberOfParticles = 300;
-    this.context = context;
     // 객체가 생성될 때 자동으로 해당 메서드가 호출되어 파티클들을 생성한다
     this.createParticles();
-
-    window.addEventListener("resize", (e) => {
-      this.resize(
-        e.target.window.innerWidth,
-        e.target.window.innerHeight,
-        this.context
-      );
-    });
   }
 
   createParticles() {
@@ -108,27 +92,9 @@ class Effect {
       }
     }
   }
-
-  resize(width, height) {
-    this.canvas.width = width;
-    this.canvas.height = height;
-    this.width = width;
-    this.height = height;
-    this.context.fillStyle = "blue";
-    // 방향과 중단점을 다시 계산해야하기때문에 다시 한 번 작성한다.. -> function 만들어도 될 듯
-    const gradient = this.context.createLinearGradient(0, 0, width, height);
-    gradient.addColorStop(0, "white");
-    gradient.addColorStop(0.5, "magenta");
-    gradient.addColorStop(1, "blue");
-    this.context.fillStyle = gradient;
-    this.context.strokeStyle = "white";
-    this.particles.forEach((particle) => {
-      particle.reset();
-    });
-  }
 }
 
-const effect = new Effect(canvas, ctx);
+const effect = new Effect(canvas);
 
 function animate() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
