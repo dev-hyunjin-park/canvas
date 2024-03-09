@@ -2,20 +2,23 @@ const canvas = document.getElementById("canvas1");
 const ctx = canvas.getContext("2d");
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
-
-// Particle 내부에 작성하면 매번 적용되기때문에 효율성을 위해 전역에 작성한다
-const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
-gradient.addColorStop(0, "white");
-gradient.addColorStop(0.5, "gold");
-gradient.addColorStop(1, "orangered");
-ctx.fillStyle = gradient;
+ctx.fillStyle = "white";
 ctx.strokeStyle = "white";
+
+const canvas2 = document.getElementById("canvas2");
+const ctx2 = canvas2.getContext("2d");
+canvas2.width = window.innerWidth;
+canvas2.height = window.innerHeight;
+ctx2.strokeStyle = "white";
+ctx2.strokWeight = 2;
 
 class Particle {
   constructor(effect) {
     this.effect = effect;
     // Math.floor: 정수로 사용하는 것이 퍼포먼스 면에서 좋음
-    this.radius = Math.floor(Math.random() * 10 + 1);
+    this.radius = Math.floor(Math.random() * 20 + 10);
+    // 매 프레임마다 계산하지 않도록
+    this.buffer = this.radius * 4;
     this.x =
       this.radius + Math.random() * (this.effect.width - this.radius * 2);
     this.y =
@@ -29,7 +32,7 @@ class Particle {
   draw(context) {
     context.beginPath();
     context.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
-    // context.fill();
+    context.fill();
   }
   update() {
     if (this.effect.mouse.pressed) {
@@ -39,9 +42,10 @@ class Particle {
       const distance = Math.hypot(dx, dy);
 
       // 마우스에 가까운 파티클일 수록 빠르게 움직인다
-      const force = this.effect.mouse.radius / distance;
+      const force = distance / this.effect.mouse.radius;
 
       // 파티클의 위치가 마우스 가까이 있다면, 두 지점 사이의 각도를 이용해서 마우스 커서의 방향으로 파티클을 이동한다
+      // -> 반대로 이동시킬 수도 있다!
       if (distance < this.effect.mouse.radius) {
         const angle = Math.atan2(dy, dx);
         this.pushX += Math.cos(angle) * force;
@@ -52,18 +56,18 @@ class Particle {
     this.x += (this.pushX *= this.friction) + this.vx;
     this.y += (this.pushY *= this.friction) + this.vy;
 
-    if (this.x < this.radius) {
-      this.x = this.radius;
+    if (this.x < this.buffer) {
+      this.x = this.buffer;
       this.vx *= -1;
-    } else if (this.x > this.effect.width - this.radius) {
-      this.x = this.effect.width - this.radius;
+    } else if (this.x > this.effect.width - this.buffer) {
+      this.x = this.effect.width - this.buffer;
       this.vx *= -1;
     }
-    if (this.y < this.radius) {
-      this.y = this.radius;
+    if (this.y < this.buffer) {
+      this.y = this.buffer;
       this.vy *= -1;
-    } else if (this.y > this.effect.height - this.radius) {
-      this.y = this.effect.height - this.radius;
+    } else if (this.y > this.effect.height - this.buffer) {
+      this.y = this.effect.height - this.buffer;
       this.vy *= -1;
     }
   }
@@ -91,7 +95,7 @@ class Effect {
       x: 0,
       y: 0,
       pressed: false,
-      radius: 200,
+      radius: 100,
     };
 
     window.addEventListener("resize", (e) => {
@@ -121,8 +125,8 @@ class Effect {
     }
   }
 
-  handleParticles(context) {
-    this.connectParticles(context);
+  handleParticles(context, context2) {
+    this.connectParticles(context2);
     this.particles.forEach((particle) => {
       particle.draw(context);
       particle.update();
@@ -157,13 +161,7 @@ class Effect {
     this.canvas.height = height;
     this.width = width;
     this.height = height;
-    this.context.fillStyle = "blue";
-    // 방향과 중단점을 다시 계산해야하기때문에 다시 한 번 작성한다.. -> function 만들어도 될 듯
-    const gradient = this.context.createLinearGradient(0, 0, width, height);
-    gradient.addColorStop(0, "white");
-    gradient.addColorStop(0.5, "gold");
-    gradient.addColorStop(1, "orangered");
-    this.context.fillStyle = gradient;
+    this.context.fillStyle = "white";
     this.context.strokeStyle = "white";
     this.particles.forEach((particle) => {
       particle.reset();
@@ -175,7 +173,9 @@ const effect = new Effect(canvas, ctx);
 
 function animate() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
-  effect.handleParticles(ctx);
+  ctx2.clearRect(0, 0, canvas2.width, canvas2.height);
+
+  effect.handleParticles(ctx, ctx2);
   requestAnimationFrame(animate);
 }
 animate();
