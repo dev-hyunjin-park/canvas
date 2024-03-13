@@ -5,7 +5,7 @@
 }
 
 #canvas1 {
-  background: black;
+  background: linear-gradient(#231646, #4d0941);
   position: absolute;
   top: 0;
   left: 0;

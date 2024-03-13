@@ -7,16 +7,12 @@ class Particle {
     this.halfImageSize = this.imageSize * 0.5;
     this.minRadius = this.radius;
     this.maxRadius = this.radius * 3;
-    this.x =
-      this.imageSize +
-      Math.random() * (this.effect.width - this.effect.maxDistance * 4);
-    this.y =
-      this.imageSize +
-      Math.random() * (this.effect.height - this.imageSize * 2);
-    this.vx = -1;
+    this.x = Math.random() * (this.effect.width + this.effect.maxDistance * 2);
+    this.y = this.imageSize + Math.random() * this.effect.height;
+    this.vx = -1.5;
     this.pushX = 0;
     this.pushY = 0;
-    this.friction = 0.95;
+    this.friction = 0.9;
 
     this.image = document.getElementById("star");
   }
@@ -30,18 +26,15 @@ class Particle {
     );
   }
   update() {
-    if (this.effect.mouse.pressed) {
-      // particle과 마우스 위치 사이의 거리를 구한다
-      const dx = this.x - this.effect.mouse.x;
-      const dy = this.y - this.effect.mouse.y;
-      const distance = Math.hypot(dx, dy);
-      const force = this.effect.mouse.radius / distance;
+    const dx = this.x - this.effect.whale.x;
+    const dy = this.y - this.effect.whale.y;
+    const distance = Math.hypot(dx, dy);
+    const force = this.effect.whale.radius / distance;
 
-      if (distance < this.effect.mouse.radius) {
-        const angle = Math.atan2(dy, dx);
-        this.pushX += Math.cos(angle) * force;
-        this.pushY += Math.cos(angle) * force;
-      }
+    if (distance < this.effect.whale.radius) {
+      const angle = Math.atan2(dy, dx);
+      this.pushX += Math.cos(angle) * force;
+      this.pushY += Math.cos(angle) * force;
     }
 
     this.x += (this.pushX *= this.friction) + this.vx;
@@ -56,12 +49,8 @@ class Particle {
   }
 
   reset() {
-    this.x =
-      this.imageSize +
-      Math.random() * (this.effect.width - this.effect.maxDistance * 4);
-    this.y =
-      this.imageSize +
-      Math.random() * (this.effect.height - this.imageSize * 2);
+    this.x = Math.random() * (this.effect.width + this.effect.maxDistance * 2);
+    this.y = this.imageSize + Math.random() * this.effect.height;
   }
 }
 
@@ -70,26 +59,28 @@ class Whale {
     this.effect = effect;
     this.x = this.effect.width * 0.5;
     this.y = this.effect.height * 0.5;
-    this.image = document.getElementById("whale2");
+    this.image = document.getElementById("whale3");
     this.angle = 0;
     this.va = 0.01; // velocity of angle
     this.curve = this.effect.height * 0.2;
     this.spriteWidth = 420;
     this.spriteHeight = 285;
     this.frameX = 0;
+    this.frameY = Math.floor(Math.random() * 4);
     this.maxFrame = 38;
     this.frameTimer = 0;
     this.frameInterval = 1000 / 55;
+    this.radius = 200;
   }
 
   draw(context) {
     context.save();
     context.translate(this.x, this.y);
-    context.rotate(Math.cos(this.angle));
+    context.rotate(Math.cos(this.angle) * 0.4);
     context.drawImage(
       this.image,
       this.frameX * this.spriteWidth,
-      0 * this.spriteHeight,
+      this.frameY * this.spriteHeight,
       this.spriteWidth,
       this.spriteHeight,
       0 - this.spriteWidth * 0.5,
@@ -122,37 +113,16 @@ class Effect {
     this.width = this.canvas.width;
     this.height = this.canvas.height;
     this.particles = [];
-    this.numberOfParticles = 100;
+    this.numberOfParticles = 500;
     this.context = context;
-    this.maxDistance = 110;
+    this.maxDistance = 150;
     this.whale = new Whale(this);
 
     // 객체가 생성될 때 자동으로 해당 메서드가 호출되어 파티클들을 생성한다
     this.createParticles();
 
-    this.mouse = {
-      x: 0,
-      y: 0,
-      pressed: false,
-      radius: 60,
-    };
-
     window.addEventListener("resize", (e) => {
-      this.resize(
-        e.target.window.innerWidth,
-        e.target.window.innerHeight,
-        this.context
-      );
-    });
-    window.addEventListener("mousemove", (e) => {
-      this.mouse.x = e.x;
-      this.mouse.y = e.y;
-    });
-    window.addEventListener("mousedown", (e) => {
-      this.mouse.pressed = true;
-    });
-    window.addEventListener("mouseup", (e) => {
-      this.mouse.pressed = false;
+      this.resize(e.target.window.innerWidth, e.target.window.innerHeight);
     });
   }
 
