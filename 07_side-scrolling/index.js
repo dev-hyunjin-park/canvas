@@ -78,6 +78,8 @@ class Whale {
     this.spriteHeight = 285;
     this.frameX = 0;
     this.maxFrame = 38;
+    this.frameTimer = 0;
+    this.frameInterval = 1000 / 55;
   }
 
   draw(context) {
@@ -98,13 +100,19 @@ class Whale {
     context.restore();
   }
 
-  update() {
+  update(deltaTime) {
     this.angle += this.va;
     this.y = this.effect.height * 0.5 + Math.sin(this.angle) * this.curve;
     if (this.angle > Math.PI * 2) {
       this.angle = 0;
     }
-    this.frameX < this.maxFrame ? this.frameX++ : (this.frameX = 0);
+    // fps
+    if (this.frameTimer > this.frameInterval) {
+      this.frameX < this.maxFrame ? this.frameX++ : (this.frameX = 0);
+      this.frameTimer = 0;
+    } else {
+      this.frameTimer += deltaTime;
+    }
   }
 }
 
@@ -154,9 +162,9 @@ class Effect {
     }
   }
 
-  handleParticles(context) {
+  handleParticles(context, deltaTime) {
     this.whale.draw(context);
-    this.whale.update();
+    this.whale.update(deltaTime);
     this.connectParticles(context);
     this.particles.forEach((particle) => {
       particle.draw(context);
@@ -210,9 +218,13 @@ window.addEventListener("load", function () {
   canvas.height = window.innerHeight;
 
   const effect = new Effect(canvas, ctx);
-  function animate() {
+
+  let lastTime = 0;
+  function animate(timeStamp) {
+    const deltaTime = timeStamp - lastTime; // 이전 프레임과 현재 프레임 사이의 시간 간격
+    lastTime = timeStamp;
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    effect.handleParticles(ctx);
+    effect.handleParticles(ctx, deltaTime);
     requestAnimationFrame(animate);
   }
 
