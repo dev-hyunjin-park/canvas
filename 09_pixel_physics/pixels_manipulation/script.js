@@ -1,3 +1,7 @@
+// 구현 방식
+// 1. 두 개의 캔버스에 각각 다른 이미지를 그린다
+// 2. 캔버스2에 마우스 위치에 따라 캔버스1의 이미지 픽셀을 가져와서 그린다
+
 // TO DO: Mouse interaction - fade out
 
 window.addEventListener("load", function () {
