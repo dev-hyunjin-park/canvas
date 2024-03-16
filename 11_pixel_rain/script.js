@@ -51,7 +51,7 @@ window.addEventListener("load", () => {
   class Particle {
     constructor() {
       this.x = Math.random() * canvas.width;
-      this.y = 0;
+      this.y = Math.random() * canvas.height;
       this.speed = 0;
       this.velocity = Math.random() * 0.5;
       // this.size = Math.random() * 1.5 + 1;
@@ -98,7 +98,7 @@ window.addEventListener("load", () => {
     ctx.globalAlpha = 0.2;
     for (let i = 0; i < particlesArray.length; i++) {
       particlesArray[i].update();
-      ctx.globalAlpha = particlesArray[i].speed * 0.5;
+      ctx.globalAlpha = particlesArray[i].speed * 0.2;
       particlesArray[i].draw();
     }
     requestAnimationFrame(animate);
