@@ -4,7 +4,7 @@ canvas.width = 700;
 canvas.height = 900;
 
 // global settings
-ctx.lineWidth = 10;
+// ctx.lineWidth = 10;
 
 // canvas shadows
 // ctx.shadowOffsetX = 2;
@@ -24,12 +24,17 @@ class Line {
     this.history = [{ x: this.x, y: this.y }];
     // 하위 픽셀 값을 얻지 않도록 Math.floor
     this.hue = Math.floor(Math.random() * 360);
-    this.lineWidth = Math.floor(Math.random() * 15 + 10);
-    this.maxLength = Math.floor(Math.random() * 10 + 10);
+    this.lineWidth = Math.floor(Math.random() * 25 + 1);
+    this.maxLength = Math.floor(Math.random() * 150 + 10);
     this.speedX = Math.random() * 1 - 0.5;
     this.speedY = 5;
-    this.lifeSpan = this.maxLength * 10;
+    this.lifeSpan = this.maxLength * 2;
+    this.breakPoint = this.lifeSpan * 0.85;
     this.timer = 0;
+    this.angle = 0;
+    this.va = Math.random() * 0.5 - 0.25; // velocity angle
+    this.curve = 10;
+    this.vc = Math.random() * 0.4 - 0.2; // velocity curve
   }
   draw(context) {
     // hsl(색조, 채도, 밝기)
@@ -45,11 +50,14 @@ class Line {
 
   update() {
     this.timer++;
+    this.angle += this.va;
+    this.curve += this.vc;
     if (this.timer < this.lifeSpan) {
-      this.x += this.speedX + Math.random() * 20 - 10;
-      this.y += this.speedY + Math.random() * 20 - 10;
-      // this.x = Math.random() * this.canvas.width;
-      // this.y = Math.random() * this.canvas.height;
+      if (this.timer > this.breakPoint) {
+        this.va *= -1.12;
+      }
+      this.x += Math.sin(this.angle) * this.curve;
+      this.y += Math.cos(this.angle) * this.curve;
       this.history.push({ x: this.x, y: this.y });
 
       if (this.history.length > this.maxLength) {
@@ -66,11 +74,14 @@ class Line {
     this.y = Math.random() * this.canvas.height;
     this.history = [{ x: this.x, y: this.y }];
     this.timer = 0;
+    this.angle = 0;
+    this.curve = 0;
+    this.va = Math.random() * 0.5 - 0.25; // velocity angle
   }
 }
 
 const linesArray = [];
-const numberOfLines = 500;
+const numberOfLines = 50;
 for (let i = 0; i < numberOfLines; i++) {
   linesArray.push(new Line(canvas));
 }
